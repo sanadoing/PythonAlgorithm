@@ -2,7 +2,6 @@ N, K = map(int, input().split())
 electronic = list(map(int, input().split()))
 
 multitap = [0] * N
-flag = False
 result = 0
 
 for i, e in enumerate(electronic):
