@@ -1,74 +1,70 @@
 from collections import deque
-import sys
 
-input = sys.stdin.readline  # 빠른 입출력 위한 코드
+dy = [-1, 0, 1, 0]
+dx = [0, -1, 0, 1]
 
-n, m = map(int, input().split())
-graph = []
-for i in range(n):
-    graph.append(list(input()))
-    for j in range(m):
-        if graph[i][j] == 'R':  # 빨간구슬 위치
-            rx, ry = i, j
-        elif graph[i][j] == 'B':  # 파란구슬 위치
-            bx, by = i, j
+N, M = map(int, input().split())
+board = []
+red_ball = [0, 0]
+blue_ball = [0, 0]
+queue = deque()
 
-# 상 하 좌 우로 탐색
-dx = [-1, 1, 0, 0]
-dy = [0, 0, -1, 1]
+for i in range(N):
+    board.append(list(map(str, input())))
+    for j in range(M):
+        if board[i][j] == 'B':
+            blue_ball[0] = i
+            blue_ball[1] = j
+            board[i][j] = '.'
+        if board[i][j] == 'R':
+            red_ball[0] = i
+            red_ball[1] = j
+            board[i][j] = '.'
 
+queue.append([1, red_ball[0], red_ball[1], blue_ball[0], blue_ball[1]])
+visited = [red_ball[0], red_ball[1], blue_ball[0], blue_ball[1]]
 
-def bfs(rx, ry, bx, by):
-    q = deque()
-    q.append((rx, ry, bx, by))
-    visited = []  # 방문여부를 판단하기 위한 리스트
-    visited.append((rx, ry, bx, by))
-    count = 0
-    while q:
-        for _ in range(len(q)):
-            rx, ry, bx, by = q.popleft()
-            if count > 10:  # 움직인 횟수가 10회 초과면 -1 출력
-                print(-1)
-                return
-            if graph[rx][ry] == 'O':  # 현재 빨간 구슬의 위치가 구멍이라면 count 출력
-                print(count)
-                return
-            for i in range(4):  # 4방향 탐색
-                nrx, nry = rx, ry
-                while True:  # #일 때까지 혹은 구멍일 때까지 움직임
-                    nrx += dx[i]
-                    nry += dy[i]
-                    if graph[nrx][nry] == '#':  # 벽인 경우 왔던 방향 그대로 한칸 뒤로 이동
-                        nrx -= dx[i]
-                        nry -= dy[i]
-                        break
-                    if graph[nrx][nry] == 'O':
-                        break
-                nbx, nby = bx, by
-                while True:  # #일 때까지 혹은 구멍일 때까지 움직임
-                    nbx += dx[i]
-                    nby += dy[i]
-                    if graph[nbx][nby] == '#':  # 벽인 경우 왔던 방향 그대로 한칸 뒤로 이동
-                        nbx -= dx[i]
-                        nby -= dy[i]
-                        break
-                    if graph[nbx][nby] == 'O':
-                        break
-                if graph[nbx][nby] == 'O':  # 파란구슬이 먼저 구멍에 들어가거나 동시에 들어가면 안됨 따라서 이 경우 무시
-                    continue
-                if nrx == nbx and nry == nby:  # 두 구슬의 위치가 같다면
-                    if abs(nrx - rx) + abs(nry - ry) > abs(nbx - bx) + abs(
-                            nby - by):  # 더 많이 이동한 구슬이 더 늦게 이동한 구슬이므로 늦게 이동한 구슬 한칸 뒤로 이동
-                        nrx -= dx[i]
-                        nry -= dy[i]
-                    else:
-                        nbx -= dx[i]
-                        nby -= dy[i]
-                if (nrx, nry, nbx, nby) not in visited:  # 방문해본적이 없는 위치라면 새로 큐에 추가 후 방문 처리
-                    q.append((nrx, nry, nbx, nby))
-                    visited.append((nrx, nry, nbx, nby))
-        count += 1
-    print(-1)  # 10회가 초과하지 않았지만 10회 내에도 구멍에 들어가지 못하는 경우
+def game():
+    while queue:
+        cnt, r_y, r_x, b_y, b_x = queue.popleft()
+
+        for i in range(4):
+            nb_y, nb_x = b_y, b_x
+            nr_y, nr_x = r_y, r_x
+
+            # blue ball 이동
+            while board[nb_y + dy[i]][nb_x + dx[i]] == '.':
+                nb_y += dy[i]
+                nb_x += dx[i]
+
+            if board[nb_y + dy[i]][nb_x + dx[i]] == 'O':
+                continue
+
+            # red ball 이동
+            while board[nr_y + dy[i]][nr_x + dx[i]] == '.':
+                nr_y += dy[i]
+                nr_x += dx[i]
+            if board[nr_y + dy[i]][nr_x + dx[i]] == 'O':
+                return cnt
 
 
-bfs(rx, ry, bx, by)
+            if nr_y == nb_y and nr_x == nb_x:
+                if abs(b_x - nb_x) + abs(b_y - nb_y) < abs(r_x - nr_x) + abs(r_y - nr_y):
+                    nr_y -= dy[i]
+                    nr_x -= dx[i]
+                else:
+                    nb_y -= dy[i]
+                    nb_x -= dx[i]
+
+            if [nr_y, nr_x, nb_y, nb_x] not in visited:
+                queue.append([cnt + 1, nr_y, nr_x, nb_y, nb_x])
+                visited.append([nr_y, nr_x, nb_y, nb_x])
+
+        if cnt > 10:
+            return -1
+
+
+    else:
+        return -1
+
+print(game())
