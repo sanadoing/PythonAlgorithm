@@ -1,0 +1,1 @@
+print(ord('L'), chr(76))
