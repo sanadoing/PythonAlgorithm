@@ -16,10 +16,10 @@ for _ in range(T):
     result = 0
     fifth = []
     #   팀원 6명이며 만약 점수의 합이 같을 경우 5번째 선수를 구분해서 출력해야함
-    for s in sort_team:
-        if s[1][0] < 6:
-            continue
-        else:
+    # for s in sort_team:
+    #     if s[1][0] < 6:
+    #         continue
+    #     else:
 
 
 
