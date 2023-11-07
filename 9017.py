@@ -3,24 +3,30 @@ T = int(input())
 for _ in range(T):
     N = int(input())
     score = list(map(int, input().split()))
-    team = dict()
+    count = {}
     for i in range(N):
-        if team.get(score[i], 0) == 0:
-            team[score[i]] = [1, i, [i]]
+        if score[i] not in count:
+            count[score[i]] = 1
         else:
-            c, s, p = team[score[i]]
-            p.append(i)
-            team[score[i]] = [c + 1, s + i, p]
+            count[score[i]] += 1
+    del_team = []
+    for c in count.items():
+        if c[1] < 6:
+            del_team.append(c[0])
+    dic = dict()
+    rank = 1
+    for i in range(N):
+        if score[i] not in del_team:
+            if score[i] not in dic:
+                dic[score[i]] = [1, rank, 0]
+            else:
+                if dic[score[i]][0] < 4:
+                    dic[score[i]][0] += 1
+                    dic[score[i]][1] += rank
+                elif dic[score[i]][0] == 4:
+                    dic[score[i]][0] += 1
+                    dic[score[i]][2] = rank
+            rank += 1
 
-    sort_team = sorted(team.items(), key=lambda item: (item[1][0], item[1][2]))
-    result = 0
-    fifth = []
-    #   팀원 6명이며 만약 점수의 합이 같을 경우 5번째 선수를 구분해서 출력해야함
-    # for s in sort_team:
-    #     if s[1][0] < 6:
-    #         continue
-    #     else:
-
-
-
-
+    result = sorted(dic.items(), key=lambda x: (x[1][1], x[1][2]))
+    print(result[0][0])
