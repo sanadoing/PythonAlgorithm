@@ -1,72 +1,71 @@
-from collections import deque, defaultdict
+from collections import deque
+import sys
 
-dy = [-1, 0, 1, 0]
-dx = [0, -1, 0, 1]
+input = sys.stdin.readline
+dx = [1, -1, 0, 0]
+dy = [0, 0, 1, -1]
 
-R, C = map(int, input().split())
-lake = []
-swan = []
-distance = [[int(1e9)] * C for _ in range(R)]
-visited = [[False] * C for _ in range(R)]
-
-for i in range(R):
-    temp = list(input())
-    lake.append(temp)
-    for j in range(C):
-        if temp[j] == 'L':
-            swan.append([i, j])
-
-
-def meet(y, x):
-    global visited
-    queue = deque([])
-    queue.append([y, x])
-    distance[y][x] = 0
-    visited = [[False] * C for _ in range(R)]
-    visited[y][x] = True
-
-    while queue:
-        y, x = queue.popleft()
+def bfs():
+    while q:
+        x, y = q.popleft()
+        if x == x2 and y == y2:
+            return 1
         for i in range(4):
-            yy, xx = y + dy[i], x + dx[i]
-            if 0 <= yy < R and 0 <= xx < C and visited[yy][xx] == False:
-                visited[yy][xx] = True
-                if lake[yy][xx] == '.':
-                    distance[yy][xx] = min(distance[y][x], distance[yy][xx])
-                    queue.appendleft([yy, xx])
-                elif lake[yy][xx] == 'X':
-                    distance[yy][xx] = min(distance[y][x] + 1, distance[yy][xx])
-                    queue.append([yy, xx])
-                else:
-                    return
+            nx = x + dx[i]
+            ny = y + dy[i]
+            if 0 <= nx < m and 0 <= ny < n:
+                if not c[nx][ny]:
+                    if a[nx][ny] == '.':
+                        q.append([nx, ny])
+                    else:
+                        q_temp.append([nx, ny])
+                    c[nx][ny] = 1
+    return 0
 
+def melt():
+    while wq:
+        x, y = wq.popleft()
+        if a[x][y] == 'X':
+            a[x][y] = '.'
+        for i in range(4):
+            nx = x + dx[i]
+            ny = y + dy[i]
+            if 0 <= nx < m and 0 <= ny < n:
+                if not wc[nx][ny]:
+                    if a[nx][ny] == 'X':
+                        wq_temp.append([nx, ny])
+                    else:
+                        wq.append([nx, ny])
+                    wc[nx][ny] = 1
 
-meet(swan[0][0], swan[0][1])
-meet(swan[1][0], swan[1][1])
+m, n = map(int, input().split())
+c = [[0]*n for _ in range(m)]
+wc = [[0]*n for _ in range(m)]
 
-queue = deque([])
-queue.append([swan[0][0], swan[0][1]])
-visited = [[False] * C for _ in range(R)]
-visited[swan[0][0]][swan[0][1]] = True
-result = -1
+a, swan = [], []
+q, q_temp, wq, wq_temp = deque(), deque(), deque(), deque()
 
-for d in distance:
-    print(d)
-while queue:
-    y, x = queue.popleft()
+for i in range(m):
+    row = list(input().strip())
+    a.append(row)
+    for j, k in enumerate(row):
+        if a[i][j] == 'L':
+            swan.extend([i, j])
+            wq.append([i, j])
+        elif a[i][j] == '.':
+            wc[i][j] = 1
+            wq.append([i, j])
 
-    for i in range(4):
-        yy, xx = y + dy[i], x + dx[i]
-        if 0 <= yy < R and 0 <= xx < C and visited[yy][xx] == False:
-            visited[yy][xx] = True
-            for v in visited:
-                print(v)
-            print()
-            if lake[yy][xx] == 'L':
-                print(result)
-                exit(0)
-            if distance[yy][xx] - distance[y][x] == 0:
-                result = max(result, distance[yy][xx])
-                queue.appendleft([yy, xx])
-            if abs(distance[yy][xx] - distance[y][x]) == 1:
-                queue.append([yy, xx])
+x1, y1, x2, y2 = swan
+q.append([x1, y1])
+a[x1][y1], a[x2][y2], c[x1][y1] = '.', '.', 1
+cnt = 0
+
+while True:
+    melt()
+    if bfs():
+        print(cnt)
+        break
+    q, wq = q_temp, wq_temp
+    q_temp, wq_temp = deque(), deque()
+    cnt += 1
