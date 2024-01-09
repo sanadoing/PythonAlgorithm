@@ -1,31 +1,36 @@
-from collections import deque
+import sys
+input = sys.stdin.readline
 
 n = int(input())
-l = deque([])
+l = []
+front, back, size = 0, -1, 0
 for _ in range(n):
     command = list(map(str, input().split()))
     if len(command) == 1:
         if command[0] == 'front':
-            if len(l) == 0:
+            if size == 0:
                 print(-1)
             else:
-                print(l[0])
+                print(l[front])
         elif command[0] == 'back':
-            if len(l) == 0:
+            if size == 0:
                 print(-1)
             else:
-                print(l[-1])
+                print(l[back])
         elif command[0] == 'size':
-            print(len(l))
+            print(size)
         elif command[0] == 'pop':
-            if len(l) == 0:
+            if size == 0:
                 print(-1)
             else:
-                print(l.popleft())
+                print(l[front])
+                front += 1
+                size -= 1
         else:
-            if len(l) == 0:
+            if size == 0:
                 print(1)
             else:
                 print(0)
     else:
         l.append(command[1])
+        size += 1
